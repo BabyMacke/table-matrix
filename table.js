@@ -25,7 +25,6 @@ const cell = (x, y) => {
 //skapa ett object som tar en plats i griden som valts av användaren
 const object = cell("@", "@");
 const createObject = (chosenX, chosenY) => {
-  console.log(chosenX, chosenY, object);
   grid[chosenY][chosenX] = object;
 };
 
@@ -38,52 +37,77 @@ const getCoords = (rows, columns, cell) => {
       }
     }
   }
-  return null;
 };
 // resetta den gammla koordinaten som innehöll objectet
 const resetOldCoord = (xCoord, yCoord) => {
-  grid[yCoord][xCoord] = cell(xCoord, yCoord);
+  grid[yCoord][xCoord] = cell(yCoord, xCoord);
 };
 // rör object framåt beroende på villen rikting det står i
 const moveForward = (xCoord, yCoord, direction) => {
-  switch (direction) {
-    case "n":
-      grid[yCoord - 1][xCoord] = object;
-      console.log("it works");
-      break;
-    case "e":
-      grid[yCoord][xCoord + 1] = object;
-      break;
-    case "w":
-      grid[yCoord][xCoord - 1] = object;
-      break;
-    case "s":
-      grid[yCoord + 1][xCoord] = object;
-      break;
+  try {
+    switch (direction) {
+      case "n":
+        grid[yCoord - 1][xCoord] = object;
+        break;
+      case "e": //kasta error ifall object går utanför på x axeln
+        if (xCoord + 1 === width) {
+          throw error;
+        }
+        grid[yCoord][xCoord + 1] = object;
+        break;
+      case "w":
+        if (xCoord - 1 === -1) {
+          throw error;
+        }
+        grid[yCoord][xCoord - 1] = object;
+        break;
+      case "s":
+        grid[yCoord + 1][xCoord] = object;
+        break;
+    }
+  } catch (error) {
+    console.log("failed");
+    failed = true;
   }
 };
 // rör object bakåt beroende på vilken rikting det står i
 const moveBackward = (xCoord, yCoord, direction) => {
-  switch (direction) {
-    case "n":
-      grid[yCoord + 1][xCoord] = object;
-      console.log("it works");
-      break;
-    case "e":
-      grid[yCoord][xCoord - 1] = object;
-      break;
-    case "w":
-      grid[yCoord][xCoord + 1] = object;
-      break;
-    case "s":
-      grid[yCoord - 1][xCoord] = object;
-      break;
+  try {
+    switch (direction) {
+      case "n":
+        grid[yCoord + 1][xCoord] = object;
+        break;
+      case "e":
+        if (xCoord - 1 === -1) {
+          throw error;
+        }
+        grid[yCoord][xCoord - 1] = object;
+        break;
+      case "w":
+        if (xCoord + 1 === width) {
+          throw error;
+        }
+        grid[yCoord][xCoord + 1] = object;
+        break;
+      case "s":
+        grid[yCoord - 1][xCoord] = object;
+        break;
+    }
+  } catch (error) {
+    console.log("failed");
+    failed = true;
   }
 };
 
+//********** globala variablar **********
 let [width, height, x, y] = [false, false, false, false];
+
 // initiera variable för idex av directions
 let directionIndex = 0;
+// boolean som kollar om programmet har failat
+let failed = false;
+// resultatet
+let result = [];
 
 process.stdin.on("data", function (data) {
   const firstInput = Buffer.from(data).toString();
@@ -101,67 +125,65 @@ process.stdin.on("data", function (data) {
 
     return;
   }
-
   const command = parseInt(data);
-  // hämta och spara varje nuvarande koordinat i 2 variablar
-  const currentXcoord = getCoords(width, height, object).x;
-  const currentYcoord = getCoords(width, height, object).y;
+  if (!failed) {
+    // hämta och spara varje nuvarande koordinat i 2 variablar
 
-  // array med alla riktningar
-  const directions = ["n", "e", "s", "w"];
+    const currentXcoord = getCoords(width, height, object).x;
+    const currentYcoord = getCoords(width, height, object).y;
 
-  // en switch som jämför användarens input command med sina cases
-  switch (command) {
-    case 0:
-      console.log("du tryckte på 0");
-      console.log(`final position: ${currentXcoord}, ${currentYcoord} `);
+    // array med alla riktningar
+    const directions = ["n", "e", "s", "w"];
+
+    // en switch som jämför användarens input command med sina cases
+    switch (command) {
+      case 0:
+        result.push(currentXcoord, currentYcoord);
+        process.exit();
+        break;
+      case 1:
+        console.log("du tryckte på 1");
+
+        resetOldCoord(currentXcoord, currentYcoord);
+        moveForward(currentXcoord, currentYcoord, directions[directionIndex]);
+
+        console.log(grid);
+        break;
+      case 2:
+        console.log("du tryckte på 2");
+
+        resetOldCoord(currentXcoord, currentYcoord);
+        moveBackward(currentXcoord, currentYcoord, directions[directionIndex]);
+
+        console.log(grid);
+        break;
+      case 3:
+        console.log("rotate clockwise");
+        // varje gång case 3 körs öka index med 1 och börja om från 0 om
+        if (directionIndex >= 3) {
+          directionIndex = 0;
+        } else {
+          directionIndex++;
+        }
+        break;
+      case 4:
+        console.log("rotate counter-clockwise");
+        if (directionIndex <= 0) {
+          directionIndex = 3;
+        } else {
+          directionIndex--;
+        }
+        break;
+    }
+  } else {
+    if (command === 0) {
+      result.push(-1, -1);
       process.exit();
-      break;
-    case 1:
-      console.log("du tryckte på 1");
-      console.log(getCoords(width, height, object));
-
-      resetOldCoord(currentXcoord, currentYcoord);
-      moveForward(currentXcoord, currentYcoord, directions[directionIndex]);
-
-      console.log(grid);
-      break;
-    case 2:
-      console.log("du tryckte på 2");
-
-      resetOldCoord(currentXcoord, currentYcoord);
-      moveBackward(currentXcoord, currentYcoord, directions[directionIndex]);
-
-      console.log(grid);
-      break;
-    case 3:
-      console.log("rotate clockwise");
-
-      // varje gång case 3 körs öka index med 1 och börja om från 0 om
-      if (directionIndex > 2) {
-        directionIndex = 0;
-        console.log("reset");
-      } else {
-        directionIndex++;
-        console.log("plus");
-      }
-
-      /* console.log(directionIndex);
-      console.log(directions[directionIndex]); */
-      break;
-    case 4:
-      console.log("rotate counter-clockwise");
-
-      if (directionIndex < 1) {
-        directionIndex = 3;
-        console.log("reset");
-      } else {
-        directionIndex--;
-        console.log("minus");
-      }
-
-      /* console.log(directionIndex);
-      console.log(directions[directionIndex]); */
-      break;
+    }
   }
+});
+
+// printa resultatet
+process.on("exit", function () {
+  process.stdout.write(`${result}`);
 });
