@@ -38,10 +38,12 @@ const getCoords = (rows, columns, cell) => {
     }
   }
 };
+
 // resetta den gammla koordinaten som innehöll objectet
 const resetOldCoord = (xCoord, yCoord) => {
   grid[yCoord][xCoord] = cell(yCoord, xCoord);
 };
+
 // rör object framåt beroende på villen rikting det står i
 const moveForward = (xCoord, yCoord, direction) => {
   try {
@@ -70,6 +72,7 @@ const moveForward = (xCoord, yCoord, direction) => {
     failed = true;
   }
 };
+
 // rör object bakåt beroende på vilken rikting det står i
 const moveBackward = (xCoord, yCoord, direction) => {
   try {
@@ -101,8 +104,7 @@ const moveBackward = (xCoord, yCoord, direction) => {
 
 //********** globala variablar **********
 let [width, height, x, y] = [false, false, false, false];
-
-// initiera variable för idex av directions
+// initiera variabel för idex av directions
 let directionIndex = 0;
 // boolean som kollar om programmet har failat
 let failed = false;
@@ -125,10 +127,10 @@ process.stdin.on("data", function (data) {
 
     return;
   }
+
   const command = parseInt(data);
   if (!failed) {
     // hämta och spara varje nuvarande koordinat i 2 variablar
-
     const currentXcoord = getCoords(width, height, object).x;
     const currentYcoord = getCoords(width, height, object).y;
 
@@ -159,8 +161,8 @@ process.stdin.on("data", function (data) {
         break;
       case 3:
         console.log("rotate clockwise");
-        // varje gång case 3 körs öka index med 1 och börja om från 0 om
-        if (directionIndex >= 3) {
+        // varje gång case 3 körs öka index med 1 och börja om från 0 om det når sista indexet
+        if (directionIndex >= directions.length - 1) {
           directionIndex = 0;
         } else {
           directionIndex++;
@@ -176,6 +178,7 @@ process.stdin.on("data", function (data) {
         break;
     }
   } else {
+    // detta körs om användaren avslutar programmet när objectet har trillat av bordet
     if (command === 0) {
       result.push(-1, -1);
       process.exit();
