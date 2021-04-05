@@ -1,4 +1,4 @@
-# table-matrix
+# Table matrix
 
 programming test
 
