@@ -23,7 +23,7 @@ Your first input should look something like this:
 
 ## Commands
 
-When the board is initiated you can give any of the following commands one by one in your desired order.
+When the board is initiated the object will look like this: '@:@'. You can then give any of the following commands one by one in your desired order.
 
 The commands are:
 ```bash
